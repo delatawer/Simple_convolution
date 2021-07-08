@@ -1,0 +1,42 @@
+#Rodrigo De la Torre Maldonado
+#Single pass convolution
+
+import cv2
+import numpy as np
+#If you are using a local ide, change the "cv2_imshow" on the code and use cv2.imshow instead
+from google.colab.patches import cv2_imshow
+
+#Remember to change the name of the file or path 
+super = cv2.imread('batman.jpg') 
+
+filter_vert = np.array([[1,0,-1],[3,0,-3],[1,0,-1]], np.int8)
+filter_horiz = np.array([[1, 3, 1],[0, 0, 0], [-1, -3, -1]], np.int8)
+
+#we pass the image to gray because we dont care about the colors (not a lot)
+gray = cv2.cvtColor(super, cv2.COLOR_BGR2GRAY)
+#we calculate the shape of the new image (in this case we are not going to use stride or padding)
+n_h = int((gray.shape[0] - 3)) + 1
+n_w = int((gray.shape[1] - 3)) + 1
+#We generate the new "canvas"
+image = np.ones((n_h, n_w))
+#We iterate through the image 
+for h in range(n_h):
+  for w in range(n_w):
+    #we calculate the start and end of the piece of image we are using
+    vert_start = h 
+    #The number 3 is the size of the filter, if you change the size of the filter, change the number
+    vert_end = vert_start + 3
+    horiz_start = w
+    horiz_end = horiz_start + 3
+    #we get that slice 
+    a_slice = gray[vert_start:vert_end, horiz_start:horiz_end]
+    #we multiply the slice and the vertical and horizontal filters 
+    s1 = np.multiply(a_slice, filter_vert)
+    s2 = np.multiply(a_slice, filter_horiz)
+    #We add the values and pass the result to the image
+    s = np.append(s1, s2)
+    z = np.sum(s)
+    image[h,w] = z
+
+cv2_imshow(image)
+cv2.imwrite("bat.jpg", image)
